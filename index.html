@@ -93,15 +93,21 @@
         left: 50%;
         transform: translateX(-50%);
         display: flex;
-        align-items: center;
-        gap: 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
         background: rgba(255,255,255,0.85);
         backdrop-filter: blur(8px);
         border: 1px solid #ddd;
-        border-radius: 999px;
-        padding: 10px 20px;
+        border-radius: 16px;
+        padding: 10px 14px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         white-space: nowrap;
+      }
+      .ui-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
       button {
         padding: 6px 16px;
@@ -122,6 +128,20 @@
         color: #666;
       }
       input[type=range] { width: 100px; cursor: pointer; }
+      #timeline {
+        width: 360px;
+      }
+      #frame-readout {
+        font-size: 0.75rem;
+        color: #666;
+        min-width: 70px;
+        text-align: right;
+      }
+      #btn-prev-frame,
+      #btn-next-frame {
+        min-width: 36px;
+        padding: 6px 10px;
+      }
     </style>
   </head>
   <body>
@@ -139,19 +159,24 @@
     <div id="main">
       <div id="lottie-container"></div>
       <div id="ui">
-        <button id="btn-play">Play</button>
-        <button id="btn-pause">Pause</button>
-        <button id="btn-stop">Stop</button>
-        <button id="btn-loop" data-looping="true">Loop: On</button>
-        <label>
-          Speed
-          <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1" />
-          <button id="btn-reset-speed">1×</button>
-        </label>
+        <div class="ui-row">
+          <button id="btn-play">Play</button>
+          <button id="btn-pause">Pause</button>
+          <button id="btn-stop">Stop</button>
+          <button id="btn-loop" data-looping="true">Loop: On</button>
+          <label>
+            Speed
+            <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1" />
+            <button id="btn-reset-speed">1x</button>
+          </label>
+        </div>
+        <div class="ui-row">
+          <button id="btn-prev-frame" title="Previous frame">&lt;</button>
+          <input type="range" id="timeline" min="0" max="1" step="1" value="0" />
+          <button id="btn-next-frame" title="Next frame">&gt;</button>
+          <span id="frame-readout">0 / 0</span>
+        </div>
       </div>
-    </div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>

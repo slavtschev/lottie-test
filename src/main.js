@@ -4,6 +4,10 @@ const container = document.getElementById('lottie-container');
 const versionList = document.getElementById('version-list');
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
+const timeline = document.getElementById('timeline');
+const frameReadout = document.getElementById('frame-readout');
+const btnPrevFrame = document.getElementById('btn-prev-frame');
+const btnNextFrame = document.getElementById('btn-next-frame');
 
 // --- Version store ---
 // Each entry: { label: string, src: string | null, data: object | null }
@@ -11,6 +15,7 @@ const fileInput = document.getElementById('file-input');
 const versions = [];
 let activeIndex = -1;
 let anim = null;
+let isScrubbing = false;
 
 function pad(n) {
   return String(n).padStart(3, '0');
@@ -53,6 +58,35 @@ function loadVersion(index) {
 
   anim = lottie.loadAnimation(config);
   anim.setSpeed(speed);
+  attachTimelineHandlers();
+}
+
+function attachTimelineHandlers() {
+  if (!anim) return;
+
+  const syncTimelineBounds = () => {
+    const maxFrame = Math.max(0, Math.round((anim.totalFrames || 1) - 1));
+    timeline.min = '0';
+    timeline.max = String(maxFrame);
+    updateTimelineFromAnim();
+  };
+
+  anim.addEventListener('DOMLoaded', syncTimelineBounds);
+  anim.addEventListener('enterFrame', updateTimelineFromAnim);
+  syncTimelineBounds();
+}
+
+function updateTimelineFromAnim() {
+  if (!anim || isScrubbing) return;
+  const current = clampFrame(Math.round(anim.currentFrame || 0));
+  timeline.value = String(current);
+  frameReadout.textContent = `${current} / ${timeline.max}`;
+}
+
+function clampFrame(value) {
+  const min = Number(timeline.min || 0);
+  const max = Number(timeline.max || 0);
+  return Math.min(max, Math.max(min, value));
 }
 
 function addVersion(label, { src = null, data = null } = {}) {
@@ -68,7 +102,10 @@ addVersion('Version 002', { src: '/data_version_002.json' });
 // --- Controls ---
 document.getElementById('btn-play').addEventListener('click', () => anim?.play());
 document.getElementById('btn-pause').addEventListener('click', () => anim?.pause());
-document.getElementById('btn-stop').addEventListener('click', () => anim?.stop());
+document.getElementById('btn-stop').addEventListener('click', () => {
+  anim?.stop();
+  updateTimelineFromAnim();
+});
 
 const btnLoop = document.getElementById('btn-loop');
 btnLoop.addEventListener('click', () => {
@@ -86,6 +123,35 @@ speedInput.addEventListener('input', (e) => {
 document.getElementById('btn-reset-speed').addEventListener('click', () => {
   speedInput.value = 1;
   anim?.setSpeed(1);
+});
+
+timeline.addEventListener('input', () => {
+  if (!anim) return;
+  isScrubbing = true;
+  const frame = clampFrame(Number(timeline.value));
+  anim.goToAndStop(frame, true);
+  frameReadout.textContent = `${frame} / ${timeline.max}`;
+});
+
+timeline.addEventListener('change', () => {
+  isScrubbing = false;
+  updateTimelineFromAnim();
+});
+
+btnPrevFrame.addEventListener('click', () => {
+  if (!anim) return;
+  const frame = clampFrame(Math.round(anim.currentFrame || 0) - 1);
+  anim.goToAndStop(frame, true);
+  isScrubbing = false;
+  updateTimelineFromAnim();
+});
+
+btnNextFrame.addEventListener('click', () => {
+  if (!anim) return;
+  const frame = clampFrame(Math.round(anim.currentFrame || 0) + 1);
+  anim.goToAndStop(frame, true);
+  isScrubbing = false;
+  updateTimelineFromAnim();
 });
 
 // --- Drag & drop / file picker (adds a new version) ---
