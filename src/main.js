@@ -98,6 +98,7 @@ function addVersion(label, { src = null, data = null } = {}) {
 // Seed Version 001 from the public file
 addVersion('Version 001', { src: '/data.json' });
 addVersion('Version 002', { src: '/data_version_002.json' });
+addVersion('Version 003', { src: '/data_version_003.json' });
 
 // --- Controls ---
 document.getElementById('btn-play').addEventListener('click', () => anim?.play());
